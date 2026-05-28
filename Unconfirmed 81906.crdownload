@@ -1,0 +1,217 @@
+import tkinter as tk
+import random
+
+# I learned about tkinter from youtube and our college notes
+# this is my project 5 - number guessing game with GUI
+
+# setting up the main window
+root = tk.Tk()
+root.title("Number Guessing Game")
+root.geometry("450x500")
+root.resizable(False, False)
+root.config(bg="#1e1e2e")
+
+# game variables
+secret_number = random.randint(1, 100)
+attempts = 0
+max_attempts = 7
+game_over = False
+
+# ---------- functions ----------
+
+def check_guess():
+    global attempts, secret_number, game_over
+
+    if game_over:
+        return
+
+    user_input = entry.get()
+
+    # check if input is empty
+    if user_input == "":
+        feedback_label.config(text="Please enter a number!", fg="#f38ba8")
+        return
+
+    # check if input is a valid number
+    if not user_input.isdigit():
+        feedback_label.config(text="Numbers only please!", fg="#f38ba8")
+        return
+
+    guess = int(user_input)
+
+    # check range
+    if guess < 1 or guess > 100:
+        feedback_label.config(text="Enter number between 1 and 100", fg="#f38ba8")
+        return
+
+    attempts += 1
+    remaining = max_attempts - attempts
+
+    if guess == secret_number:
+        feedback_label.config(
+            text=f"🎉 Correct! You got it in {attempts} attempts!",
+            fg="#a6e3a1"
+        )
+        attempts_label.config(text=f"Attempts: {attempts}/{max_attempts}")
+        play_again_btn.pack(pady=10)
+        guess_btn.config(state="disabled")
+        entry.config(state="disabled")
+        game_over = True
+
+    elif guess < secret_number:
+        if remaining > 0:
+            feedback_label.config(
+                text=f"Too Low! 📈  ({remaining} attempts left)",
+                fg="#fab387"
+            )
+        else:
+            end_game()
+
+    else:
+        if remaining > 0:
+            feedback_label.config(
+                text=f"Too High! 📉  ({remaining} attempts left)",
+                fg="#89b4fa"
+            )
+        else:
+            end_game()
+
+    attempts_label.config(text=f"Attempts: {attempts}/{max_attempts}")
+    entry.delete(0, tk.END)
+
+    # if attempts are used up
+    if attempts == max_attempts and not game_over:
+        end_game()
+
+
+def end_game():
+    global game_over
+    game_over = True
+    feedback_label.config(
+        text=f"😢 Game Over! The number was {secret_number}",
+        fg="#f38ba8"
+    )
+    guess_btn.config(state="disabled")
+    entry.config(state="disabled")
+    play_again_btn.pack(pady=10)
+
+
+def play_again():
+    global secret_number, attempts, game_over
+
+    # reset everything
+    secret_number = random.randint(1, 100)
+    attempts = 0
+    game_over = False
+
+    feedback_label.config(text="Guess a number between 1 and 100", fg="#cdd6f4")
+    attempts_label.config(text=f"Attempts: 0/{max_attempts}")
+    entry.config(state="normal")
+    entry.delete(0, tk.END)
+    guess_btn.config(state="normal")
+    play_again_btn.pack_forget()
+
+
+# pressing Enter key also submits the guess
+def on_enter_key(event):
+    check_guess()
+
+# ---------- UI Layout ----------
+
+# title
+title_label = tk.Label(
+    root,
+    text="🎯 Number Guessing Game",
+    font=("Courier", 20, "bold"),
+    bg="#1e1e2e",
+    fg="#cba6f7"
+)
+title_label.pack(pady=25)
+
+# subtitle
+sub_label = tk.Label(
+    root,
+    text="I will think of a number between 1 and 100",
+    font=("Courier", 11),
+    bg="#1e1e2e",
+    fg="#a6adc8"
+)
+sub_label.pack()
+
+# entry box for user input
+entry = tk.Entry(
+    root,
+    font=("Courier", 16),
+    width=10,
+    justify="center",
+    bg="#313244",
+    fg="#cdd6f4",
+    insertbackground="#cdd6f4",
+    relief="flat",
+    bd=5
+)
+entry.pack(pady=25)
+entry.bind("<Return>", on_enter_key)
+entry.focus()
+
+# guess button
+guess_btn = tk.Button(
+    root,
+    text="  Guess!  ",
+    font=("Courier", 13, "bold"),
+    bg="#cba6f7",
+    fg="#1e1e2e",
+    activebackground="#b4befe",
+    relief="flat",
+    cursor="hand2",
+    command=check_guess
+)
+guess_btn.pack(pady=5)
+
+# feedback message
+feedback_label = tk.Label(
+    root,
+    text="Guess a number between 1 and 100",
+    font=("Courier", 12),
+    bg="#1e1e2e",
+    fg="#cdd6f4",
+    wraplength=350
+)
+feedback_label.pack(pady=20)
+
+# attempts counter
+attempts_label = tk.Label(
+    root,
+    text=f"Attempts: 0/{max_attempts}",
+    font=("Courier", 11),
+    bg="#1e1e2e",
+    fg="#a6adc8"
+)
+attempts_label.pack()
+
+# play again button (hidden at start)
+play_again_btn = tk.Button(
+    root,
+    text="  Play Again  ",
+    font=("Courier", 12, "bold"),
+    bg="#a6e3a1",
+    fg="#1e1e2e",
+    activebackground="#94e2d5",
+    relief="flat",
+    cursor="hand2",
+    command=play_again
+)
+# not packing it here, only shown when game ends
+
+# footer
+footer = tk.Label(
+    root,
+    text="Made with ❤️ using Python & Tkinter",
+    font=("Courier", 9),
+    bg="#1e1e2e",
+    fg="#585b70"
+)
+footer.pack(side="bottom", pady=15)
+
+# start the app
+root.mainloop()
